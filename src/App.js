@@ -1,28 +1,60 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
+import { createBrowserHistory} from 'history';
+import { connect } from 'react-redux';
+import Layout from './hoc/Layout/Layout';
+import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
+import { autoSignUp } from '././store/actions/auth';
+import asyncComponents from './hoc/asyncComponents/asyncComponents';
 
+const history=createBrowserHistory();
+
+const asyncCheckout= asyncComponents(()=>{
+  return import('./containers/Checkout/Checkout');
+})
+const asyncOrders= asyncComponents(()=>{
+  return import('./containers/Orders/Orders');
+})
+const asyncAuth= asyncComponents(()=>{
+  return import('./containers/Auth/Auth');
+})
 class App extends Component {
-  render() {
+
+  componentDidMount(){
+    this.props.onAutoSignup();
+  }
+  render () {
+    let routes=(
+      <Switch>
+        <Route path="/" exact component={BurgerBuilder} />
+        <Route path='/auth'  exact component={asyncAuth}/>
+        <Redirect to="/"/>
+      </Switch>
+    )
+    if(this.props.isAuthenticated){
+      routes=(
+        <Switch>
+          <Route path="/checkout" component={asyncCheckout} />
+          <Route path="/orders" component={asyncOrders} />
+          <Route path="/" exact component={BurgerBuilder} />
+          <Route path='/auth'  exact component={asyncAuth}/>
+          <Redirect to="/"/>
+        </Switch>
+      )
+    }
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <Layout history={history}>
+          {routes}
+        </Layout>
       </div>
     );
   }
 }
-
-export default App;
+const mapDispatchToProps = dispatch =>({
+  onAutoSignup:() => dispatch(autoSignUp())
+})
+const mapStateToProps = state => ({
+  isAuthenticated: state.auth.token!==null
+})
+export default withRouter(connect(mapStateToProps,mapDispatchToProps)(App));
