@@ -44,7 +44,7 @@ self.__precacheManifest = [
     "url": "/my-burger-builder/static/css/3.826db057.chunk.css"
   },
   {
-    "revision": "8f7242c1064613c04ec17f0ec612eb81",
+    "revision": "a72455630cc80988ba588ebae922fd45",
     "url": "/my-burger-builder/index.html"
   }
 ];
